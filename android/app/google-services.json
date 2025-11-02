@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "415143074118",
+    "project_id": "travel-guide-app-68520",
+    "storage_bucket": "travel-guide-app-68520.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:415143074118:android:bf216b0099cd4a44142d47",
+        "android_client_info": {
+          "package_name": "com.example.travel_guide_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAHGeyb0gQJSsK5anpKjnryq6bjnJ-_Hk4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

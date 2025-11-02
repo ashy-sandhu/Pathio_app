@@ -1,12 +1,125 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:provider/provider.dart';
 import '../../data/models/place_model.dart';
 import '../../services/maps_service.dart';
+import '../../state/providers/auth_provider.dart';
+import '../../state/providers/user_profile_provider.dart';
+import '../../core/theme/app_colors.dart';
+import 'auth_required_dialog.dart';
 
-class PlaceDetailsSheet extends StatelessWidget {
+class PlaceDetailsSheet extends StatefulWidget {
   final Place place;
 
   const PlaceDetailsSheet({super.key, required this.place});
+
+  @override
+  State<PlaceDetailsSheet> createState() => _PlaceDetailsSheetState();
+}
+
+class _PlaceDetailsSheetState extends State<PlaceDetailsSheet> {
+  bool _isSaved = false;
+  bool _isChecking = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkIfSaved();
+  }
+
+  Future<void> _checkIfSaved() async {
+    final authProvider = context.read<AuthProvider>();
+    if (!authProvider.isAuthenticated) return;
+
+    setState(() => _isChecking = true);
+    final isSaved = await context.read<UserProfileProvider>().isPlaceSaved(
+          userId: authProvider.user!.uid,
+          placeId: widget.place.id.toString(),
+        );
+    setState(() {
+      _isSaved = isSaved;
+      _isChecking = false;
+    });
+  }
+
+  Future<void> _toggleSave() async {
+    final authProvider = context.read<AuthProvider>();
+    if (!authProvider.isAuthenticated) {
+      if (mounted) {
+        AuthRequiredDialog.show(
+          context: context,
+          message: 'Please login to save places to your favorites.',
+        );
+      }
+      return;
+    }
+
+    final profileProvider = context.read<UserProfileProvider>();
+    final success = _isSaved
+        ? await profileProvider.removePlace(
+            userId: authProvider.user!.uid,
+            placeId: widget.place.id.toString(),
+          )
+        : await profileProvider.savePlace(
+            userId: authProvider.user!.uid,
+            placeId: widget.place.id.toString(),
+            placeData: widget.place,
+          );
+
+    if (mounted) {
+      if (success) {
+        setState(() => _isSaved = !_isSaved);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              _isSaved ? 'Removed from favorites' : 'Saved to favorites!',
+            ),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              profileProvider.error ?? 'Failed to update favorites',
+            ),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _openDirections() async {
+    final authProvider = context.read<AuthProvider>();
+    if (!authProvider.isAuthenticated) {
+      if (mounted) {
+        AuthRequiredDialog.show(
+          context: context,
+          message: 'Please login to use the directions feature.',
+        );
+      }
+      return;
+    }
+
+    try {
+      await MapsService.showMapsChooser(
+        context: context,
+        latitude: widget.place.lat,
+        longitude: widget.place.lon,
+        placeName: widget.place.name,
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to open maps: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +165,7 @@ class PlaceDetailsSheet extends StatelessWidget {
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
+                              color: Colors.black.withValues(alpha: 0.1),
                               spreadRadius: 2,
                               blurRadius: 8,
                               offset: const Offset(0, 4),
@@ -77,14 +190,14 @@ class PlaceDetailsSheet extends StatelessWidget {
                               children: [
                                 Expanded(
                                   child: Text(
-                                    place.name,
+                                    widget.place.name,
                                     style: const TextStyle(
                                       fontSize: 24,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                 ),
-                                if (place.rating != null) ...[
+                                if (widget.place.rating != null) ...[
                                   const SizedBox(width: 12),
                                   Container(
                                     padding: const EdgeInsets.symmetric(
@@ -105,7 +218,7 @@ class PlaceDetailsSheet extends StatelessWidget {
                                         ),
                                         const SizedBox(width: 4),
                                         Text(
-                                          place.rating!.toStringAsFixed(1),
+                                          widget.place.rating!.toStringAsFixed(1),
                                           style: const TextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 14,
@@ -130,7 +243,7 @@ class PlaceDetailsSheet extends StatelessWidget {
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  '${place.cityName}, ${place.countryName}',
+                                  '${widget.place.cityName}, ${widget.place.countryName}',
                                   style: TextStyle(
                                     fontSize: 16,
                                     color: Colors.grey[600],
@@ -150,11 +263,11 @@ class PlaceDetailsSheet extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color: Theme.of(
                                   context,
-                                ).primaryColor.withOpacity(0.1),
+                                ).primaryColor.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(16),
                               ),
                               child: Text(
-                                place.category.toUpperCase(),
+                                widget.place.category.toUpperCase(),
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
@@ -174,7 +287,7 @@ class PlaceDetailsSheet extends StatelessWidget {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              place.description,
+                              widget.place.description,
                               style: const TextStyle(fontSize: 16, height: 1.5),
                             ),
 
@@ -185,35 +298,11 @@ class PlaceDetailsSheet extends StatelessWidget {
                               children: [
                                 Expanded(
                                   child: ElevatedButton.icon(
-                                    onPressed: () async {
-                                      try {
-                                        await MapsService.showMapsChooser(
-                                          context: context,
-                                          latitude: place.lat,
-                                          longitude: place.lon,
-                                          placeName: place.name,
-                                        );
-                                      } catch (e) {
-                                        if (context.mounted) {
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                'Failed to open maps: $e',
-                                              ),
-                                              backgroundColor: Colors.red,
-                                            ),
-                                          );
-                                        }
-                                      }
-                                    },
+                                    onPressed: _openDirections,
                                     icon: const Icon(Icons.directions),
                                     label: const Text('Directions'),
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: Theme.of(
-                                        context,
-                                      ).primaryColor,
+                                      backgroundColor: AppColors.primary,
                                       foregroundColor: Colors.white,
                                       padding: const EdgeInsets.symmetric(
                                         vertical: 12,
@@ -227,22 +316,25 @@ class PlaceDetailsSheet extends StatelessWidget {
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: OutlinedButton.icon(
-                                    onPressed: () {
-                                      // TODO: Implement save to favorites
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        const SnackBar(
-                                          content: Text('Saved to favorites!'),
-                                        ),
-                                      );
-                                    },
-                                    icon: const Icon(Icons.favorite_border),
-                                    label: const Text('Save'),
+                                    onPressed: _isChecking ? null : _toggleSave,
+                                    icon: _isChecking
+                                        ? const SizedBox(
+                                            width: 16,
+                                            height: 16,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                            ),
+                                          )
+                                        : Icon(
+                                            _isSaved
+                                                ? Icons.favorite
+                                                : Icons.favorite_border,
+                                          ),
+                                    label: Text(_isSaved ? 'Saved' : 'Save'),
                                     style: OutlinedButton.styleFrom(
-                                      foregroundColor: Theme.of(
-                                        context,
-                                      ).primaryColor,
+                                      foregroundColor: _isSaved
+                                          ? AppColors.error
+                                          : AppColors.primary,
                                       padding: const EdgeInsets.symmetric(
                                         vertical: 12,
                                       ),
@@ -271,7 +363,7 @@ class PlaceDetailsSheet extends StatelessWidget {
   }
 
   Widget _buildImage() {
-    if (place.imageUrl == null || place.imageUrl!.isEmpty) {
+    if (widget.place.imageUrl == null || widget.place.imageUrl!.isEmpty) {
       return Container(
         color: Colors.grey[200],
         child: const Center(
@@ -281,7 +373,7 @@ class PlaceDetailsSheet extends StatelessWidget {
     }
 
     return CachedNetworkImage(
-      imageUrl: place.imageUrl!,
+      imageUrl: widget.place.imageUrl!,
       fit: BoxFit.cover,
       width: double.infinity,
       height: double.infinity,

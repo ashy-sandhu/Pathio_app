@@ -9,7 +9,7 @@ class MapsService {
     required double longitude,
     String? placeName,
   }) async {
-    final String query = placeName != null ? placeName : '$latitude,$longitude';
+    final String query = placeName ?? '$latitude,$longitude';
 
     final String googleMapsUrl =
         'https://www.google.com/maps/search/?api=1&query=$query';
@@ -43,7 +43,7 @@ class MapsService {
     required double longitude,
     String? placeName,
   }) async {
-    final String query = placeName != null ? placeName : '$latitude,$longitude';
+    final String query = placeName ?? '$latitude,$longitude';
 
     final String googleMapsUrl =
         'https://www.google.com/maps/search/?api=1&query=$query';
@@ -136,7 +136,7 @@ class MapsService {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor.withOpacity(0.1),
+                color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(

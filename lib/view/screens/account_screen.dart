@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/theme/app_colors.dart';
+import '../../state/providers/auth_provider.dart';
 import '../components/custom_app_bar.dart';
 
 class AccountScreen extends StatelessWidget {
@@ -15,7 +19,12 @@ class AccountScreen extends StatelessWidget {
         child: Column(
           children: [
             // Profile Section
-            _buildProfileSection(context),
+            Consumer<AuthProvider>(
+              builder: (context, authProvider, child) => _buildProfileSection(
+                context,
+                authProvider.isAuthenticated ? authProvider.user : null,
+              ),
+            ),
             const SizedBox(height: 24),
 
             // My Activity Section
@@ -23,26 +32,38 @@ class AccountScreen extends StatelessWidget {
               context: context,
               title: 'MY ACTIVITY',
               items: [
-                _buildMenuItem(
-                  context: context,
-                  icon: Icons.bookmark,
-                  title: 'Saved Places',
-                  subtitle: 'Your favorite destinations',
-                  onTap: () => _showComingSoon(context, 'Saved Places'),
+                Consumer<AuthProvider>(
+                  builder: (context, authProvider, child) => _buildMenuItem(
+                    context: context,
+                    icon: Icons.bookmark,
+                    title: 'Saved Places',
+                    subtitle: 'Your favorite destinations',
+                    onTap: authProvider.isAuthenticated
+                        ? () => context.push('/saved-places')
+                        : () => _showLoginRequired(context),
+                  ),
                 ),
-                _buildMenuItem(
-                  context: context,
-                  icon: Icons.rate_review,
-                  title: 'My Reviews',
-                  subtitle: 'Reviews you\'ve written',
-                  onTap: () => _showComingSoon(context, 'My Reviews'),
+                Consumer<AuthProvider>(
+                  builder: (context, authProvider, child) => _buildMenuItem(
+                    context: context,
+                    icon: Icons.rate_review,
+                    title: 'My Reviews',
+                    subtitle: 'Reviews you\'ve written',
+                    onTap: authProvider.isAuthenticated
+                        ? () => context.push('/my-reviews')
+                        : () => _showLoginRequired(context),
+                  ),
                 ),
-                _buildMenuItem(
-                  context: context,
-                  icon: Icons.history,
-                  title: 'Trip History',
-                  subtitle: 'Places you\'ve visited',
-                  onTap: () => _showComingSoon(context, 'Trip History'),
+                Consumer<AuthProvider>(
+                  builder: (context, authProvider, child) => _buildMenuItem(
+                    context: context,
+                    icon: Icons.flight_takeoff,
+                    title: 'My Trips',
+                    subtitle: 'Your travel plans',
+                    onTap: authProvider.isAuthenticated
+                        ? () => context.push('/trips')
+                        : () => _showLoginRequired(context),
+                  ),
                 ),
               ],
             ),
@@ -58,7 +79,7 @@ class AccountScreen extends StatelessWidget {
                   icon: Icons.settings,
                   title: 'Settings',
                   subtitle: 'App preferences and configuration',
-                  onTap: () => _showComingSoon(context, 'Settings'),
+                  onTap: () => context.push('/settings'),
                 ),
                 _buildMenuItem(
                   context: context,
@@ -116,7 +137,12 @@ class AccountScreen extends StatelessWidget {
             const SizedBox(height: 24),
 
             // Logout Section
-            _buildLogoutSection(context),
+            Consumer<AuthProvider>(
+              builder: (context, authProvider, child) =>
+                  authProvider.isAuthenticated
+                      ? _buildLogoutSection(context)
+                      : _buildLoginSection(context),
+            ),
             const SizedBox(height: 32),
           ],
         ),
@@ -124,7 +150,7 @@ class AccountScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileSection(BuildContext context) {
+  Widget _buildProfileSection(BuildContext context, authUser) {
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(20),
@@ -134,7 +160,7 @@ class AccountScreen extends StatelessWidget {
         border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadow.withOpacity(0.1),
+            color: AppColors.shadow.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -148,19 +174,36 @@ class AccountScreen extends StatelessWidget {
             height: 80,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.primary.withOpacity(0.1),
+              color: AppColors.primary.withValues(alpha: 0.1),
               border: Border.all(color: AppColors.primary, width: 2),
             ),
-            child: Icon(
-              Icons.person,
-              size: 40,
-              color: AppColors.primary,
-            ),
+            child: authUser?.photoUrl != null
+                ? ClipOval(
+                    child: CachedNetworkImage(
+                      imageUrl: authUser.photoUrl!,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => Icon(
+                        Icons.person,
+                        size: 40,
+                        color: AppColors.primary,
+                      ),
+                      errorWidget: (context, url, error) => Icon(
+                        Icons.person,
+                        size: 40,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  )
+                : Icon(
+                    Icons.person,
+                    size: 40,
+                    color: AppColors.primary,
+                  ),
           ),
           const SizedBox(height: 16),
           // Name
           Text(
-            'John Doe',
+            authUser?.displayName ?? 'Guest User',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
@@ -169,25 +212,39 @@ class AccountScreen extends StatelessWidget {
           const SizedBox(height: 4),
           // Email
           Text(
-            'john.doe@example.com',
+            authUser?.email ?? 'Not logged in',
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                   color: AppColors.textSecondary,
                 ),
           ),
           const SizedBox(height: 16),
-          // Edit Profile Button
-          OutlinedButton.icon(
-            onPressed: () => _showComingSoon(context, 'Edit Profile'),
-            icon: const Icon(Icons.edit, size: 18),
-            label: const Text('Edit Profile'),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.primary,
-              side: BorderSide(color: AppColors.primary),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+          // Edit Profile Button or Login Button
+          if (authUser != null)
+            OutlinedButton.icon(
+              onPressed: () => _showComingSoon(context, 'Edit Profile'),
+              icon: const Icon(Icons.edit, size: 18),
+              label: const Text('Edit Profile'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.primary,
+                side: BorderSide(color: AppColors.primary),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            )
+          else
+            ElevatedButton.icon(
+              onPressed: () => context.push('/login'),
+              icon: const Icon(Icons.login, size: 18),
+              label: const Text('Login'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
             ),
-          ),
         ],
       ),
     );
@@ -206,7 +263,7 @@ class AccountScreen extends StatelessWidget {
         border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadow.withOpacity(0.1),
+            color: AppColors.shadow.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -249,7 +306,7 @@ class AccountScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
+                color: AppColors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
@@ -300,9 +357,9 @@ class AccountScreen extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           decoration: BoxDecoration(
-            color: AppColors.error.withOpacity(0.1),
+            color: AppColors.error.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.error.withOpacity(0.3)),
+            border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
           ),
           child: Row(
             children: [
@@ -368,6 +425,66 @@ class AccountScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildLoginSection(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      child: InkWell(
+        onTap: () => context.push('/login'),
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          decoration: BoxDecoration(
+            color: AppColors.primary.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.login,
+                size: 20,
+                color: AppColors.primary,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  'Login to Access All Features',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.primary,
+                      ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showLoginRequired(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Login Required'),
+        content: const Text('Please login to access this feature.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              context.push('/login');
+            },
+            child: const Text('Login'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -380,10 +497,22 @@ class AccountScreen extends StatelessWidget {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              _showComingSoon(context, 'Logout');
+              final authProvider = context.read<AuthProvider>();
+              await authProvider.logout();
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Logged out successfully'),
+                    backgroundColor: AppColors.success,
+                  ),
+                );
+              }
             },
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.error,
+            ),
             child: const Text('Logout'),
           ),
         ],

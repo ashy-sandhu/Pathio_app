@@ -137,7 +137,7 @@ class _CustomBottomNavState extends State<CustomBottomNav>
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
                 color: isActive
-                    ? AppColors.primary.withOpacity(0.1)
+                    ? AppColors.primary.withValues(alpha: 0.1)
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(20),
               ),
@@ -153,7 +153,7 @@ class _CustomBottomNavState extends State<CustomBottomNav>
                       boxShadow: isActive
                           ? [
                               BoxShadow(
-                                color: AppColors.primary.withOpacity(0.3),
+                                color: AppColors.primary.withValues(alpha: 0.3),
                                 blurRadius: 8,
                                 offset: const Offset(0, 2),
                               ),

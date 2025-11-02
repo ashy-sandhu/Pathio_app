@@ -234,8 +234,4 @@ class PlacesProvider extends ChangeNotifier {
     }
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'home_screen_new.dart';
 import 'search_screen.dart';
+import 'trips_screen.dart';
 import 'review_screen.dart';
 import 'account_screen.dart';
 import '../components/custom_bottom_nav.dart';
@@ -18,10 +19,7 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _screens = [
     const HomeScreen(),
     const SearchScreen(),
-    const _PlaceholderScreen(
-      title: 'Trips',
-      icon: Icons.travel_explore_rounded,
-    ),
+    const TripsScreen(),
     const ReviewScreen(),
     const AccountScreen(),
   ];
@@ -37,42 +35,6 @@ class _MainScreenState extends State<MainScreen> {
             _currentIndex = index;
           });
         },
-      ),
-    );
-  }
-}
-
-class _PlaceholderScreen extends StatelessWidget {
-  final String title;
-  final IconData icon;
-
-  const _PlaceholderScreen({required this.title, required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title), centerTitle: true),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 80, color: Colors.grey[400]),
-            const SizedBox(height: 16),
-            Text(
-              '$title Screen',
-              style: Theme.of(
-                context,
-              ).textTheme.headlineSmall?.copyWith(color: Colors.grey[600]),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Coming Soon',
-              style: Theme.of(
-                context,
-              ).textTheme.bodyLarge?.copyWith(color: Colors.grey[500]),
-            ),
-          ],
-        ),
       ),
     );
   }

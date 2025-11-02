@@ -20,9 +20,24 @@ class PlacesMapCard extends StatefulWidget {
 
 class _PlacesMapCardState extends State<PlacesMapCard> {
   GoogleMapController? _mapController;
-  Set<Marker> _markers = {};
+  final Set<Marker> _markers = {};
   LatLng? _userLocation;
   LatLng? _mapCenter;
+
+  // Map style to hide POI labels
+  static const String _mapStyle = '''
+    [
+      {
+        "featureType": "poi",
+        "elementType": "labels",
+        "stylers": [
+          {
+            "visibility": "off"
+          }
+        ]
+      }
+    ]
+  ''';
 
   @override
   void initState() {
@@ -78,7 +93,7 @@ class _PlacesMapCardState extends State<PlacesMapCard> {
 
     // Limit markers to prevent memory issues (max 20 markers)
     final limitedPlaces = widget.nearbyPlaces.take(20).toList();
-    
+
     for (int i = 0; i < limitedPlaces.length; i++) {
       final place = limitedPlaces[i];
       _markers.add(
@@ -93,7 +108,9 @@ class _PlacesMapCardState extends State<PlacesMapCard> {
     }
 
     if (kDebugMode) {
-      print('🗺️ Created ${_markers.length} markers (${limitedPlaces.length} places)');
+      print(
+        '🗺️ Created ${_markers.length} markers (${limitedPlaces.length} places)',
+      );
     }
 
     setState(() {});
@@ -115,21 +132,6 @@ class _PlacesMapCardState extends State<PlacesMapCard> {
 
   void _onMapCreated(GoogleMapController controller) {
     _mapController = controller;
-
-    // Set map style for better appearance
-    _mapController?.setMapStyle('''
-      [
-        {
-          "featureType": "poi",
-          "elementType": "labels",
-          "stylers": [
-            {
-              "visibility": "off"
-            }
-          ]
-        }
-      ]
-    ''');
   }
 
   @override
@@ -167,7 +169,7 @@ class _PlacesMapCardState extends State<PlacesMapCard> {
         border: Border.all(color: AppColors.border),
         boxShadow: [
           BoxShadow(
-            color: AppColors.shadow.withOpacity(0.1),
+            color: AppColors.shadow.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -232,6 +234,7 @@ class _PlacesMapCardState extends State<PlacesMapCard> {
                   target: _mapCenter!,
                   zoom: 15, // Zoomed out to show ~3km radius
                 ),
+                style: _mapStyle,
                 markers: _markers,
                 myLocationEnabled: true,
                 myLocationButtonEnabled: false, // We have custom button

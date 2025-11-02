@@ -11,7 +11,6 @@ class AppTheme {
         primary: AppColors.primary,
         secondary: AppColors.secondary,
         surface: AppColors.surface,
-        background: AppColors.background,
         error: AppColors.error,
       ),
 
@@ -195,7 +194,6 @@ class AppTheme {
         primary: AppColors.primary,
         secondary: AppColors.secondary,
         surface: const Color(0xFF1E1E1E),
-        background: const Color(0xFF121212),
         error: AppColors.error,
       ),
     );

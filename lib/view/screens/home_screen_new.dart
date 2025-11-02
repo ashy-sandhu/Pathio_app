@@ -195,7 +195,7 @@ class _HomeScreenState extends State<HomeScreen>
                       shaderCallback: (bounds) => LinearGradient(
                         colors: [
                           AppColors.primary,
-                          AppColors.primary.withOpacity(0.8),
+                          AppColors.primary.withValues(alpha: 0.8),
                         ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
@@ -287,7 +287,7 @@ class _HomeScreenState extends State<HomeScreen>
                       shaderCallback: (bounds) => LinearGradient(
                         colors: [
                           AppColors.secondary,
-                          AppColors.secondary.withOpacity(0.8),
+                          AppColors.secondary.withValues(alpha: 0.8),
                         ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
@@ -526,9 +526,9 @@ class _HomeScreenState extends State<HomeScreen>
   Widget _buildCompactExploreButton({required VoidCallback onTap}) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.primary.withOpacity(0.1),
+        color: AppColors.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
       ),
       child: Material(
         color: Colors.transparent,
@@ -565,9 +565,9 @@ class _HomeScreenState extends State<HomeScreen>
   Widget _buildCompactRefreshButton({required VoidCallback onTap}) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.secondary.withOpacity(0.1),
+        color: AppColors.secondary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.secondary.withOpacity(0.3)),
+        border: Border.all(color: AppColors.secondary.withValues(alpha: 0.3)),
       ),
       child: Material(
         color: Colors.transparent,
