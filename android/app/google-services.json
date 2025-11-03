@@ -12,7 +12,12 @@
           "package_name": "com.example.travel_guide_app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "415143074118-hu49073prdv8vred0j8j9l936pjjssod.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAHGeyb0gQJSsK5anpKjnryq6bjnJ-_Hk4"
@@ -20,7 +25,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "415143074118-hu49073prdv8vred0j8j9l936pjjssod.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
