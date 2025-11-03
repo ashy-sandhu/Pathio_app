@@ -12,6 +12,8 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
+  bool _hasError = false;
+
   @override
   void initState() {
     super.initState();
@@ -21,6 +23,36 @@ class _SplashScreenState extends State<SplashScreen>
         context.goNamed('home');
       }
     });
+  }
+
+  TextStyle _getTitleStyle(BuildContext context) {
+    final baseStyle = Theme.of(context).textTheme.headlineLarge;
+    if (baseStyle == null) {
+      return const TextStyle(
+        color: AppColors.textOnPrimary,
+        fontWeight: FontWeight.bold,
+        fontSize: 32,
+      );
+    }
+    return baseStyle.copyWith(
+      color: AppColors.textOnPrimary,
+      fontWeight: FontWeight.bold,
+      fontSize: 32,
+    );
+  }
+
+  TextStyle _getSubtitleStyle(BuildContext context) {
+    final baseStyle = Theme.of(context).textTheme.titleMedium;
+    if (baseStyle == null) {
+      return TextStyle(
+        color: AppColors.textOnPrimary.withOpacity(0.9),
+        fontSize: 16,
+      );
+    }
+    return baseStyle.copyWith(
+      color: AppColors.textOnPrimary.withOpacity(0.9),
+      fontSize: 16,
+    );
   }
 
   @override
@@ -42,34 +74,49 @@ class _SplashScreenState extends State<SplashScreen>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Lottie Animation
+              // Lottie Animation with error handling
               SizedBox(
                 width: 300,
                 height: 300,
-                child: Lottie.asset(
-                  'assets/animations/splash_screen.json',
-                  fit: BoxFit.contain,
-                  repeat: false,
-                  animate: true,
-                ),
+                child: _hasError
+                    ? const Icon(
+                        Icons.travel_explore,
+                        size: 150,
+                        color: AppColors.textOnPrimary,
+                      )
+                    : Lottie.asset(
+                        'assets/animations/splash_screen.json',
+                        fit: BoxFit.contain,
+                        repeat: false,
+                        animate: true,
+                        errorBuilder: (context, error, stackTrace) {
+                          // Set error flag on next frame
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            if (mounted) {
+                              setState(() {
+                                _hasError = true;
+                              });
+                            }
+                          });
+                          // Return fallback icon
+                          return const Icon(
+                            Icons.travel_explore,
+                            size: 150,
+                            color: AppColors.textOnPrimary,
+                          );
+                        },
+                      ),
               ),
               const SizedBox(height: 40),
               // App Name
               Text(
                 'Travel Guide',
-                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                      color: AppColors.textOnPrimary,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 32,
-                    ),
+                style: _getTitleStyle(context),
               ),
               const SizedBox(height: 8),
               Text(
                 'Discover amazing places',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: AppColors.textOnPrimary.withOpacity(0.9),
-                      fontSize: 16,
-                    ),
+                style: _getSubtitleStyle(context),
               ),
               const SizedBox(height: 60),
               // Loading indicator
