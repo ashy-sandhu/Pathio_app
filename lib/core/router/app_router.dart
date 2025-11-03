@@ -11,6 +11,10 @@ import 'package:travel_guide_app/view/screens/user_reviews_screen.dart';
 import 'package:travel_guide_app/view/screens/settings_screen.dart';
 import 'package:travel_guide_app/view/screens/create_trip_screen.dart';
 import 'package:travel_guide_app/view/screens/trip_details_screen.dart';
+import 'package:travel_guide_app/view/screens/privacy_policy_screen.dart';
+import 'package:travel_guide_app/view/screens/help_support_screen.dart';
+import 'package:travel_guide_app/view/screens/edit_profile_screen.dart';
+import 'package:travel_guide_app/view/screens/security_screen.dart';
 import 'package:travel_guide_app/data/models/place_model.dart';
 import 'package:travel_guide_app/data/models/trip_model.dart';
 
@@ -102,6 +106,26 @@ final GoRouter appRouter = GoRouter(
       path: '/settings',
       name: 'settings',
       builder: (context, state) => const SettingsScreen(),
+    ),
+    GoRoute(
+      path: '/privacy-policy',
+      name: 'privacy-policy',
+      builder: (context, state) => const PrivacyPolicyScreen(),
+    ),
+    GoRoute(
+      path: '/help-support',
+      name: 'help-support',
+      builder: (context, state) => const HelpSupportScreen(),
+    ),
+    GoRoute(
+      path: '/edit-profile',
+      name: 'edit-profile',
+      builder: (context, state) => const EditProfileScreen(),
+    ),
+    GoRoute(
+      path: '/security',
+      name: 'security',
+      builder: (context, state) => const SecurityScreen(),
     ),
   ],
 );

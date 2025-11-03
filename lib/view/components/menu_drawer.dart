@@ -15,22 +15,6 @@ class MenuDrawer extends StatelessWidget {
     );
   }
 
-  void _showComingSoon(BuildContext context, String feature) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(feature),
-        content: Text('$feature feature is coming soon!'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _showAboutDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -308,14 +292,20 @@ class MenuDrawer extends StatelessWidget {
                     icon: Icons.help_outline,
                     title: 'Help & Support',
                     subtitle: 'Get help and contact support',
-                    onTap: () => _showComingSoon(context, 'Help & Support'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.push('/help-support');
+                    },
                   ),
                   _buildMenuItem(
                     context: context,
                     icon: Icons.privacy_tip_outlined,
                     title: 'Privacy Policy',
                     subtitle: 'How we protect your data',
-                    onTap: () => _showComingSoon(context, 'Privacy Policy'),
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.push('/privacy-policy');
+                    },
                   ),
 
                   const SizedBox(height: 16),

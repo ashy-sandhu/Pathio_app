@@ -1,12 +1,15 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
-import '../data/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'dart:io';
+import '../data/models/user_model.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseStorage _storage = FirebaseStorage.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   // Get current user
@@ -290,6 +293,167 @@ class AuthService {
       }
       throw Exception('Failed to get or create user profile: $e');
     }
+  }
+
+  // Update user profile
+  Future<AppUser> updateProfile({
+    String? displayName,
+    String? photoUrl,
+  }) async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) {
+        throw Exception('No user is currently signed in');
+      }
+
+      // Update Firebase Auth profile
+      if (displayName != null) {
+        await user.updateDisplayName(displayName);
+      }
+      if (photoUrl != null) {
+        await user.updatePhotoURL(photoUrl);
+      }
+      await user.reload();
+      final updatedUser = _auth.currentUser!;
+
+      // Update Firestore profile
+      final userDoc = _firestore.collection('users').doc(user.uid);
+      await userDoc.update({
+        if (displayName != null) 'displayName': displayName,
+        if (photoUrl != null) 'photoUrl': photoUrl,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      // Return updated user
+      return AppUser.fromFirebaseAuth(
+        updatedUser.uid,
+        updatedUser.email ?? '',
+        displayName: updatedUser.displayName,
+        photoUrl: updatedUser.photoURL,
+        provider: _getProviderFromUser(updatedUser),
+      );
+    } catch (e) {
+      throw Exception('Failed to update profile: $e');
+    }
+  }
+
+  // Upload photo to Firebase Storage
+  Future<String> uploadPhoto(File imageFile, String userId) async {
+    try {
+      final ref = _storage.ref().child('users/$userId/profile_${DateTime.now().millisecondsSinceEpoch}.jpg');
+      await ref.putFile(imageFile);
+      final downloadUrl = await ref.getDownloadURL();
+      return downloadUrl;
+    } catch (e) {
+      throw Exception('Failed to upload photo: $e');
+    }
+  }
+
+  // Change password
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) {
+        throw Exception('No user is currently signed in');
+      }
+
+      // For email/password users, re-authenticate before changing password
+      if (user.providerData.first.providerId == 'password') {
+        final credential = EmailAuthProvider.credential(
+          email: user.email!,
+          password: currentPassword,
+        );
+        await user.reauthenticateWithCredential(credential);
+      }
+
+      await user.updatePassword(newPassword);
+    } on FirebaseAuthException catch (e) {
+      throw _handleAuthException(e);
+    } catch (e) {
+      throw Exception('Failed to change password: $e');
+    }
+  }
+
+  // Delete account
+  Future<void> deleteAccount({String? password}) async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) {
+        throw Exception('No user is currently signed in');
+      }
+
+      // For email/password users, re-authenticate before deleting
+      if (user.providerData.first.providerId == 'password' && password != null) {
+        final credential = EmailAuthProvider.credential(
+          email: user.email!,
+          password: password,
+        );
+        await user.reauthenticateWithCredential(credential);
+      }
+
+      final userId = user.uid;
+
+      // Delete reviews by user first
+      final reviewsSnapshot = await _firestore
+          .collection('reviews')
+          .where('userId', isEqualTo: userId)
+          .get();
+      final batch = _firestore.batch();
+      for (final doc in reviewsSnapshot.docs) {
+        batch.delete(doc.reference);
+      }
+
+      // Delete user document (subcollections will be deleted via Cloud Function or manually)
+      final userDoc = _firestore.collection('users').doc(userId);
+      
+      // Delete saved places subcollection
+      final savedPlacesSnapshot = await userDoc.collection('saved_places').get();
+      for (final doc in savedPlacesSnapshot.docs) {
+        batch.delete(doc.reference);
+      }
+
+      // Delete trips subcollection
+      final tripsSnapshot = await userDoc.collection('trips').get();
+      for (final doc in tripsSnapshot.docs) {
+        batch.delete(doc.reference);
+      }
+
+      // Delete user document
+      batch.delete(userDoc);
+
+      // Commit all deletions
+      await batch.commit();
+
+      // Delete photos from Storage
+      final photosRef = _storage.ref().child('users/$userId');
+      try {
+        final listResult = await photosRef.listAll();
+        for (final item in listResult.items) {
+          await item.delete();
+        }
+      } catch (e) {
+        // Ignore if folder doesn't exist
+      }
+
+      // Delete Firebase Auth account
+      await user.delete();
+    } on FirebaseAuthException catch (e) {
+      throw _handleAuthException(e);
+    } catch (e) {
+      throw Exception('Failed to delete account: $e');
+    }
+  }
+
+  String _getProviderFromUser(User user) {
+    if (user.providerData.isNotEmpty) {
+      final providerId = user.providerData.first.providerId;
+      if (providerId.contains('google')) return 'google';
+      if (providerId.contains('facebook')) return 'facebook';
+    }
+    return 'email';
   }
 
   // Handle Firebase Auth exceptions

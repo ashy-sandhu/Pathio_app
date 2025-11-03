@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/theme/app_colors.dart';
 import '../../state/providers/auth_provider.dart';
+import '../../state/providers/theme_provider.dart';
 import '../components/custom_app_bar.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -15,7 +16,6 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _notificationsEnabled = true;
   String _selectedLanguage = 'English';
-  bool _isDarkMode = false;
 
   @override
   void initState() {
@@ -28,7 +28,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() {
       _notificationsEnabled = prefs.getBool('notifications_enabled') ?? true;
       _selectedLanguage = prefs.getString('selected_language') ?? 'English';
-      _isDarkMode = prefs.getBool('is_dark_mode') ?? false;
     });
   }
 
@@ -45,10 +44,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _saveThemeSetting(bool isDark) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('is_dark_mode', isDark);
-    setState(() => _isDarkMode = isDark);
-    // Note: Theme change would require MaterialApp rebuild, handled separately
+    final themeProvider = context.read<ThemeProvider>();
+    await themeProvider.setThemeMode(isDark ? ThemeMode.dark : ThemeMode.light);
   }
 
   @override
@@ -66,13 +63,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 icon: Icons.person_outline,
                 title: 'Edit Profile',
                 subtitle: 'Update your profile information',
-                onTap: () => _showComingSoon('Edit Profile'),
+                onTap: () => Navigator.pushNamed(context, '/edit-profile'),
               ),
               _buildMenuItem(
                 icon: Icons.photo_camera_outlined,
                 title: 'Change Photo',
                 subtitle: 'Update your profile picture',
-                onTap: () => _showComingSoon('Change Photo'),
+                onTap: () => Navigator.pushNamed(context, '/edit-profile'),
               ),
             ],
           ),
@@ -96,13 +93,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 subtitle: _selectedLanguage,
                 onTap: () => _showLanguageDialog(),
               ),
-              SwitchListTile(
-                secondary: Icon(Icons.dark_mode_outlined, color: AppColors.primary),
-                title: const Text('Dark Mode'),
-                subtitle: const Text('Enable dark theme'),
-                value: _isDarkMode,
-                onChanged: _saveThemeSetting,
-                activeColor: AppColors.primary,
+              Consumer<ThemeProvider>(
+                builder: (context, themeProvider, child) {
+                  return SwitchListTile(
+                    secondary: Icon(Icons.dark_mode_outlined, color: AppColors.primary),
+                    title: const Text('Dark Mode'),
+                    subtitle: const Text('Enable dark theme'),
+                    value: themeProvider.isDarkMode,
+                    onChanged: (value) => _saveThemeSetting(value),
+                    activeColor: AppColors.primary,
+                  );
+                },
               ),
             ],
           ),
@@ -116,13 +117,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 icon: Icons.privacy_tip_outlined,
                 title: 'Privacy Policy',
                 subtitle: 'View our privacy policy',
-                onTap: () => _showComingSoon('Privacy Policy'),
+                onTap: () => Navigator.pushNamed(context, '/privacy-policy'),
               ),
               _buildMenuItem(
                 icon: Icons.security,
                 title: 'Security',
                 subtitle: 'Manage account security',
-                onTap: () => _showComingSoon('Security'),
+                onTap: () => Navigator.pushNamed(context, '/security'),
               ),
             ],
           ),
@@ -244,9 +245,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              _showComingSoon('Delete Account');
+              await _showDeleteAccountConfirmation();
             },
             style: TextButton.styleFrom(
               foregroundColor: AppColors.error,
@@ -258,20 +259,139 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  void _showComingSoon(String feature) {
-    showDialog(
+  Future<void> _showDeleteAccountConfirmation() async {
+    final passwordController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    
+    final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(feature),
-        content: Text('$feature feature will be available soon!'),
+        title: const Text('Delete Account'),
+        content: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Are you absolutely sure? This action cannot be undone and will permanently delete:',
+              ),
+              const SizedBox(height: 12),
+              const Text('• Your account'),
+              const Text('• All saved places'),
+              const Text('• All trips'),
+              const Text('• All reviews'),
+              const Text('• All uploaded photos'),
+              const SizedBox(height: 16),
+              const Text(
+                'Please enter your password to confirm:',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              TextFormField(
+                controller: passwordController,
+                decoration: const InputDecoration(
+                  labelText: 'Password',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.lock),
+                ),
+                obscureText: true,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your password';
+                  }
+                  return null;
+                },
+              ),
+            ],
+          ),
+        ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              if (formKey.currentState!.validate()) {
+                Navigator.pop(context, passwordController.text);
+              }
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.error,
+            ),
+            child: const Text('Delete Account'),
           ),
         ],
       ),
     );
+
+    if (confirmed != null && confirmed is String) {
+      // User confirmed deletion with password
+      _deleteAccount(confirmed);
+    }
+  }
+
+  Future<void> _deleteAccount(String password) async {
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Final Confirmation'),
+          content: const Text(
+            'This is your last chance. Are you absolutely certain you want to delete your account?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.error,
+              ),
+              child: const Text('Yes, Delete Forever'),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmed == true) {
+        final scaffoldMessenger = ScaffoldMessenger.of(context);
+        
+        final success = await authProvider.deleteAccount(password: password);
+        
+        if (success) {
+          scaffoldMessenger.showSnackBar(
+            const SnackBar(
+              content: Text('Account deleted successfully'),
+              backgroundColor: AppColors.success,
+            ),
+          );
+          if (context.mounted) {
+            Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+          }
+        } else {
+          scaffoldMessenger.showSnackBar(
+            SnackBar(
+              content: Text(authProvider.error ?? 'Failed to delete account'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
   }
 }
 

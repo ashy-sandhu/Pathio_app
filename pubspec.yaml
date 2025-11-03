@@ -26,6 +26,7 @@ dependencies:
   flutter_facebook_auth: ^7.1.2
   firebase_storage: ^12.3.4
   lottie: ^3.1.2
+  image_picker: ^1.1.2
 
 dev_dependencies:
   flutter_test:
@@ -37,7 +38,7 @@ flutter:
 
   # Assets
   assets:
-    - assets/animations/
+    - assets/animations/splash_screen.json
 
 
   # fonts:

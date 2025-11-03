@@ -107,17 +107,22 @@ class _SplashScreenState extends State<SplashScreen>
                         fit: BoxFit.contain,
                         repeat: false,
                         animate: true,
+                        width: 300,
+                        height: 300,
                         errorBuilder: (context, error, stackTrace) {
                           // Log error for debugging
-                          debugPrint('Lottie animation error: $error');
+                          debugPrint('=== LOTTIE ANIMATION ERROR ===');
+                          debugPrint('Error: $error');
                           debugPrint('Stack trace: $stackTrace');
+                          debugPrint('Asset path: assets/animations/splash_screen.json');
+                          debugPrint('===============================');
                           
                           // Set error flag on next frame
                           WidgetsBinding.instance.addPostFrameCallback((_) {
                             if (mounted) {
                               setState(() {
                                 _hasError = true;
-                                _errorMessage = error.toString();
+                                _errorMessage = 'Failed to load animation:\n${error.toString()}';
                               });
                             }
                           });
@@ -130,13 +135,16 @@ class _SplashScreenState extends State<SplashScreen>
                                 size: 150,
                                 color: AppColors.textOnPrimary,
                               ),
-                              Text(
-                                'Animation Error',
-                                style: const TextStyle(
-                                  color: AppColors.textOnPrimary,
-                                  fontSize: 12,
+                              const Padding(
+                                padding: EdgeInsets.only(top: 8),
+                                child: Text(
+                                  'Animation Error',
+                                  style: TextStyle(
+                                    color: AppColors.textOnPrimary,
+                                    fontSize: 12,
+                                  ),
+                                  textAlign: TextAlign.center,
                                 ),
-                                textAlign: TextAlign.center,
                               ),
                             ],
                           );

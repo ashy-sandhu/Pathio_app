@@ -86,21 +86,21 @@ class AccountScreen extends StatelessWidget {
                   icon: Icons.notifications,
                   title: 'Notifications',
                   subtitle: 'Manage notification preferences',
-                  onTap: () => _showComingSoon(context, 'Notifications'),
+                  onTap: () => context.push('/settings'),
                 ),
                 _buildMenuItem(
                   context: context,
                   icon: Icons.language,
                   title: 'Language',
                   subtitle: 'Choose your preferred language',
-                  onTap: () => _showComingSoon(context, 'Language'),
+                  onTap: () => context.push('/settings'),
                 ),
                 _buildMenuItem(
                   context: context,
                   icon: Icons.palette,
                   title: 'Theme',
                   subtitle: 'Light or dark mode',
-                  onTap: () => _showComingSoon(context, 'Theme'),
+                  onTap: () => context.push('/settings'),
                 ),
               ],
             ),
@@ -123,14 +123,14 @@ class AccountScreen extends StatelessWidget {
                   icon: Icons.privacy_tip,
                   title: 'Privacy Policy',
                   subtitle: 'How we protect your data',
-                  onTap: () => _showComingSoon(context, 'Privacy Policy'),
+                  onTap: () => context.push('/privacy-policy'),
                 ),
                 _buildMenuItem(
                   context: context,
                   icon: Icons.help,
                   title: 'Help & Support',
                   subtitle: 'Get help and contact support',
-                  onTap: () => _showComingSoon(context, 'Help & Support'),
+                  onTap: () => context.push('/help-support'),
                 ),
               ],
             ),
@@ -221,7 +221,7 @@ class AccountScreen extends StatelessWidget {
           // Edit Profile Button or Login Button
           if (authUser != null)
             OutlinedButton.icon(
-              onPressed: () => _showComingSoon(context, 'Edit Profile'),
+              onPressed: () => context.push('/edit-profile'),
               icon: const Icon(Icons.edit, size: 18),
               label: const Text('Edit Profile'),
               style: OutlinedButton.styleFrom(
@@ -381,22 +381,6 @@ class AccountScreen extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  void _showComingSoon(BuildContext context, String feature) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(feature),
-        content: Text('$feature feature will be available soon!'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
       ),
     );
   }

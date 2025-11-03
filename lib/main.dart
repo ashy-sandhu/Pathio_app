@@ -9,6 +9,7 @@ import 'state/providers/filter_provider.dart';
 import 'state/providers/search_provider.dart';
 import 'state/providers/auth_provider.dart';
 import 'state/providers/user_profile_provider.dart';
+import 'state/providers/theme_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -53,6 +54,7 @@ class _TravelGuideAppState extends State<TravelGuideApp>
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (context) => ThemeProvider()),
         ChangeNotifierProvider(create: (context) => AuthProvider()),
         ChangeNotifierProvider(create: (context) => UserProfileProvider()),
         ChangeNotifierProvider(create: (context) => PlacesProvider()),
@@ -60,13 +62,17 @@ class _TravelGuideAppState extends State<TravelGuideApp>
         ChangeNotifierProvider(create: (context) => FilterProvider()),
         ChangeNotifierProvider(create: (context) => SearchProvider()),
       ],
-      child: MaterialApp.router(
-        title: 'Travel Guide',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.lightTheme,
-        darkTheme: AppTheme.darkTheme,
-        themeMode: ThemeMode.light,
-        routerConfig: appRouter,
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          return MaterialApp.router(
+            title: 'Travel Guide',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: themeProvider.themeMode,
+            routerConfig: appRouter,
+          );
+        },
       ),
     );
   }
