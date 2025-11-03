@@ -13,6 +13,7 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   bool _hasError = false;
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -79,10 +80,27 @@ class _SplashScreenState extends State<SplashScreen>
                 width: 300,
                 height: 300,
                 child: _hasError
-                    ? const Icon(
-                        Icons.travel_explore,
-                        size: 150,
-                        color: AppColors.textOnPrimary,
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.travel_explore,
+                            size: 150,
+                            color: AppColors.textOnPrimary,
+                          ),
+                          if (_errorMessage != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 16),
+                              child: Text(
+                                _errorMessage!,
+                                style: const TextStyle(
+                                  color: AppColors.textOnPrimary,
+                                  fontSize: 12,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                        ],
                       )
                     : Lottie.asset(
                         'assets/animations/splash_screen.json',
@@ -90,20 +108,51 @@ class _SplashScreenState extends State<SplashScreen>
                         repeat: false,
                         animate: true,
                         errorBuilder: (context, error, stackTrace) {
+                          // Log error for debugging
+                          debugPrint('Lottie animation error: $error');
+                          debugPrint('Stack trace: $stackTrace');
+                          
                           // Set error flag on next frame
                           WidgetsBinding.instance.addPostFrameCallback((_) {
                             if (mounted) {
                               setState(() {
                                 _hasError = true;
+                                _errorMessage = error.toString();
                               });
                             }
                           });
                           // Return fallback icon
-                          return const Icon(
-                            Icons.travel_explore,
-                            size: 150,
-                            color: AppColors.textOnPrimary,
+                          return Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.travel_explore,
+                                size: 150,
+                                color: AppColors.textOnPrimary,
+                              ),
+                              Text(
+                                'Animation Error',
+                                style: const TextStyle(
+                                  color: AppColors.textOnPrimary,
+                                  fontSize: 12,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
                           );
+                        },
+                        frameBuilder: (context, child, frame) {
+                          if (frame == null) {
+                            // Animation is still loading
+                            return const Center(
+                              child: CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  AppColors.textOnPrimary,
+                                ),
+                              ),
+                            );
+                          }
+                          return child;
                         },
                       ),
               ),
