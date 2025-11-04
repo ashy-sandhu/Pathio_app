@@ -32,6 +32,7 @@ class _SplashScreenState extends State<SplashScreen> {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // Lottie Animation with FutureBuilder to handle errors properly
             SizedBox(
@@ -149,8 +150,10 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             ),
             const SizedBox(height: 40),
-            // Splash Screen Logo (SVG)
-            Center(
+            // Splash Screen Logo (SVG) - Centered
+            Container(
+              width: double.infinity,
+              alignment: Alignment.center,
               child: SizedBox(
                 width: 240,
                 height: 75,
