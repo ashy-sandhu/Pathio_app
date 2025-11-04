@@ -39,6 +39,7 @@ flutter:
   # Assets
   assets:
     - assets/animations/splash_screen.json
+    - assets/animations/Travel is fun.json
 
 
   # fonts:
