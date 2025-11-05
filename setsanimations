@@ -1,5 +1,0 @@
-[33m8bf0612[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Merge branch 'main' of https://github.com/ashy-sandhu/travel_guide_app
-[33m121f7a6[m Add email verification functionality - Added email verification methods to AuthService - Created EmailVerificationScreen with resend functionality - Updated signup flow to navigate to verification screen - Updated login flow to check email verification status - Added email verification route to router
-[33mfb82cf3[m json updated for authentication
-[33mbce69c7[m Ready for another member
-[33m25a4e9c[m Major Refactor: Restructured app architecture and Updated Files
