@@ -96,19 +96,22 @@
 
 ## 🛠️ Tech Stack
 
-### Framework & Language
+### Frontend
 - **Flutter** - Cross-platform mobile framework
 - **Dart** - Programming language
-
-### State Management
 - **Provider** - State management solution
-
-### Navigation
 - **GoRouter** - Declarative routing for Flutter
+
+### Backend
+- **Django** - Python web framework
+- **Django REST Framework** - RESTful API development
+- **PostgreSQL** - Database (via Railway)
+- **Railway** - Hosting platform
 
 ### Backend Services
 - **Firebase** - Authentication, Firestore, Storage
-- **REST API** - Railway-hosted backend for places data
+- **Django REST API** - Custom backend API for places, cities, and countries data
+  - API Base URL: `https://web-production-40bd5.up.railway.app`
 
 ### Key Packages
 - `google_maps_flutter` - Google Maps integration
@@ -169,7 +172,21 @@ flutter pub get
    - Maps SDK for Android
    - Places API (if needed)
 
-### 5. Configure App Icon
+### 5. Backend API Configuration
+
+The app connects to a Django REST API backend. The API is currently hosted on Railway:
+
+- **Production API**: `https://web-production-40bd5.up.railway.app`
+
+If you want to use a different API endpoint, update `lib/core/constants/api_endpoints.dart`:
+
+```dart
+static const String baseUrl = 'your_api_url_here';
+```
+
+> **Note**: Make sure the backend API is running and accessible before running the app. The API handles all places, cities, and countries data.
+
+### 6. Configure App Icon
 
 Generate app icons using:
 ```bash
@@ -179,6 +196,16 @@ flutter pub run flutter_launcher_icons
 ---
 
 ## 🏃 Running the App
+
+### Prerequisites
+
+1. **Backend API**: Ensure the Django backend API is running and accessible
+   - API URL: `https://web-production-40bd5.up.railway.app`
+   - Or run locally if you have the API repository
+
+2. **Firebase**: Configure Firebase as mentioned in the installation steps
+
+3. **Google Maps**: Set up Google Maps API key
 
 ### Development Mode
 
@@ -242,6 +269,19 @@ Ensure `android/app/google-services.json` is present (not committed to git).
 ### API Endpoints
 
 Backend API endpoints are configured in `lib/core/constants/api_endpoints.dart`.
+
+**API Base URL:** `https://web-production-40bd5.up.railway.app`
+
+**Available Endpoints:**
+- `/api/places/` - Get all places
+- `/api/popular/` - Get popular places
+- `/api/nearby/` - Get nearby places (requires lat, lon, radius)
+- `/api/search/` - Search places (requires query)
+- `/api/cities/` - Get all cities
+- `/api/countries/` - Get all countries
+- `/health/` - Health check endpoint
+
+> **Note:** The backend API is built with Django and hosted on Railway at `https://web-production-40bd5.up.railway.app`.
 
 ---
 
@@ -310,10 +350,20 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
+## 🔗 Backend API
+
+This app uses a **Django REST API** backend for fetching places, cities, and countries data.
+
+- **API Base URL**: `https://web-production-40bd5.up.railway.app`
+- **Built with**: Django and Django REST Framework
+- **Hosted on**: Railway
+- **Provides**: RESTful endpoints for places, cities, and countries data
+
 ## 🙏 Acknowledgments
 
 - **Flutter Team** - For the amazing framework
-- **Firebase** - For backend services
+- **Django Team** - For the robust web framework
+- **Firebase** - For authentication and backend services
 - **Google Maps** - For mapping services
 - **Railway** - For hosting the backend API
 - **LottieFiles** - For animations
