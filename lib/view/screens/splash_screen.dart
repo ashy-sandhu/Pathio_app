@@ -151,15 +151,14 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
             const SizedBox(height: 40),
             // Splash Screen Logo (SVG) - Centered
-            Container(
-              width: double.infinity,
-              alignment: Alignment.center,
+            Center(
               child: SizedBox(
                 width: 240,
                 height: 75,
                 child: SvgPicture.asset(
                   'assets/logo/splashscreenicon.svg',
                   fit: BoxFit.contain,
+                  alignment: Alignment.center,
                 ),
               ),
             ),
