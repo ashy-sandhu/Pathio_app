@@ -20,21 +20,20 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            width: 180,
-            height: 80,
-            child: SvgPicture.asset(
-              'assets/logo/appbaricon.svg',
-              fit: BoxFit.contain,
-            ),
+      title: Align(
+        alignment: Alignment.centerLeft,
+        child: SizedBox(
+          width: 180,
+          height: 80,
+          child: SvgPicture.asset(
+            'assets/logo/appbaricon.svg',
+            fit: BoxFit.contain,
+            alignment: Alignment.centerLeft,
           ),
-        ],
+        ),
       ),
       backgroundColor: AppColors.surface,
-      centerTitle: true,
+      centerTitle: false,
       foregroundColor: AppColors.textPrimary,
       elevation: 0,
       shadowColor: AppColors.shadow,
@@ -56,6 +55,17 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         tooltip: 'Menu',
       ),
       actions: [
+        IconButton(
+          onPressed: () {
+            // TODO: Implement notification functionality
+          },
+          icon: const Icon(
+            Icons.notifications_outlined,
+            color: AppColors.iconPrimary,
+            size: 24,
+          ),
+          tooltip: 'Notifications',
+        ),
         if (actions != null) ...actions!,
         const SizedBox(width: 8),
       ],
