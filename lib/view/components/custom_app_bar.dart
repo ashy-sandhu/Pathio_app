@@ -25,56 +25,63 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       titleSpacing: 0,
       automaticallyImplyLeading: false,
       leadingWidth: 56,
+      toolbarHeight: 56,
       foregroundColor: AppColors.textPrimary,
       elevation: 0,
       shadowColor: AppColors.shadow,
       surfaceTintColor: Colors.transparent,
       flexibleSpace: SafeArea(
-        child: Row(
-          children: [
-            IconButton(
-              onPressed: onMenuTap ?? () {
-                if (scaffoldKey?.currentState != null) {
-                  scaffoldKey!.currentState!.openDrawer();
-                } else {
-                  _showMenuDialog(context);
-                }
-              },
-              icon: const Icon(
-                Icons.menu_rounded,
-                color: AppColors.iconPrimary,
-                size: 24,
-              ),
-              tooltip: 'Menu',
-            ),
-            const SizedBox(width: 4),
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: SizedBox(
-                width: 180,
-                height: 80,
-                child: SvgPicture.asset(
-                  'assets/logo/appbaricon.svg',
-                  fit: BoxFit.contain,
-                  alignment: Alignment.centerLeft,
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 4.0),
+            child: Row(
+              children: [
+                IconButton(
+                  onPressed: onMenuTap ?? () {
+                    if (scaffoldKey?.currentState != null) {
+                      scaffoldKey!.currentState!.openDrawer();
+                    } else {
+                      _showMenuDialog(context);
+                    }
+                  },
+                  icon: const Icon(
+                    Icons.menu_rounded,
+                    color: AppColors.iconPrimary,
+                    size: 24,
+                  ),
+                  tooltip: 'Menu',
                 ),
-              ),
+                const SizedBox(width: 4),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: SizedBox(
+                    width: 180,
+                    height: 80,
+                    child: SvgPicture.asset(
+                      'assets/logo/appbaricon.svg',
+                      fit: BoxFit.contain,
+                      alignment: Alignment.centerLeft,
+                    ),
+                  ),
+                ),
+                const Spacer(),
+                IconButton(
+                  onPressed: () {
+                    // Notification functionality will be implemented in future update
+                  },
+                  icon: const Icon(
+                    Icons.notifications_outlined,
+                    color: AppColors.iconPrimary,
+                    size: 24,
+                  ),
+                  tooltip: 'Notifications',
+                ),
+                if (actions != null) ...actions!,
+                const SizedBox(width: 8),
+              ],
             ),
-            const Spacer(),
-            IconButton(
-              onPressed: () {
-                // Notification functionality will be implemented in future update
-              },
-              icon: const Icon(
-                Icons.notifications_outlined,
-                color: AppColors.iconPrimary,
-                size: 24,
-              ),
-              tooltip: 'Notifications',
-            ),
-            if (actions != null) ...actions!,
-            const SizedBox(width: 8),
-          ],
+          ),
         ),
       ),
       bottom: PreferredSize(
@@ -114,5 +121,5 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight + 1);
+  Size get preferredSize => const Size.fromHeight(56 + 1);
 }
