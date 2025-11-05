@@ -149,6 +149,8 @@ class _HomeScreenState extends State<HomeScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+
+                  const SizedBox(height:12),
                   // Popular Places Section
                   _buildPopularPlacesSection(),
 
