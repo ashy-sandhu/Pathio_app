@@ -198,24 +198,15 @@ class _HomeScreenState extends State<HomeScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Special typography for title
-                    ShaderMask(
-                      shaderCallback: (bounds) => LinearGradient(
-                        colors: [
-                          AppColors.primary,
-                          AppColors.primary.withValues(alpha: 0.8),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ).createShader(bounds),
-                      child: const Text(
-                        'Popular Places',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
-                          letterSpacing: -0.5,
-                        ),
+                    // Solid color typography for title
+                    const Text(
+                      'Popular Places',
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.primary,
+                        letterSpacing: -0.5,
+                        height: 1.2,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -232,14 +223,17 @@ class _HomeScreenState extends State<HomeScreen>
                 ),
               ),
               const SizedBox(width: 16),
-              // Compact explore more button
+              // Compact explore more button with padding for Popular Places
               Consumer<PlacesProvider>(
                 builder: (context, placesProvider, child) {
                   if (placesProvider.hasMorePopular) {
-                    return _buildCompactExploreButton(
-                      onTap: () => _navigateToExploreMore(
-                        'popular',
-                        placesProvider.popularPlaces,
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: _buildCompactExploreButton(
+                        onTap: () => _navigateToExploreMore(
+                          'popular',
+                          placesProvider.popularPlaces,
+                        ),
                       ),
                     );
                   }
@@ -290,24 +284,15 @@ class _HomeScreenState extends State<HomeScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Special typography for title
-                    ShaderMask(
-                      shaderCallback: (bounds) => LinearGradient(
-                        colors: [
-                          AppColors.secondary,
-                          AppColors.secondary.withValues(alpha: 0.8),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ).createShader(bounds),
-                      child: const Text(
-                        'Nearby Places',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
-                          letterSpacing: -0.5,
-                        ),
+                    // Solid color typography for title
+                    const Text(
+                      'Nearby Places',
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.secondary,
+                        letterSpacing: -0.5,
+                        height: 1.2,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -342,9 +327,12 @@ class _HomeScreenState extends State<HomeScreen>
                     },
                   ),
                   const SizedBox(width: 8),
-                  Consumer<LocationProvider>(
-                    builder: (context, locationProvider, child) {
-                      if (locationProvider.hasLocation) {
+                  // Show refresh button only when no places are loaded
+                  Consumer2<PlacesProvider, LocationProvider>(
+                    builder: (context, placesProvider, locationProvider, child) {
+                      if (locationProvider.hasLocation && 
+                          placesProvider.nearbyPlaces.isEmpty &&
+                          !placesProvider.isLoadingNearby) {
                         return _buildCompactRefreshButton(
                           onTap: () => _refreshNearbyPlaces(),
                         );
