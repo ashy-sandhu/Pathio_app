@@ -3,17 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_colors.dart';
 import '../../state/providers/auth_provider.dart';
-import '../components/auth_required_dialog.dart';
 
 class MenuDrawer extends StatelessWidget {
   const MenuDrawer({super.key});
-
-  void _showLoginRequired(BuildContext context) {
-    AuthRequiredDialog.show(
-      context: context,
-      message: 'Please login to access this feature.',
-    );
-  }
 
   void _showAboutDialog(BuildContext context) {
     showDialog(
@@ -70,7 +62,6 @@ class MenuDrawer extends StatelessWidget {
     required String title,
     String? subtitle,
     required VoidCallback onTap,
-    bool requiresAuth = false,
   }) {
     return ListTile(
       leading: Icon(icon, color: AppColors.primary),

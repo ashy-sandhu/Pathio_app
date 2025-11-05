@@ -85,7 +85,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 subtitle: const Text('Receive push notifications'),
                 value: _notificationsEnabled,
                 onChanged: _saveNotificationSetting,
-                activeColor: AppColors.primary,
+                activeThumbColor: AppColors.primary,
+                activeTrackColor: AppColors.primary.withValues(alpha: 0.5),
               ),
               _buildMenuItem(
                 icon: Icons.language,
@@ -101,7 +102,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     subtitle: const Text('Enable dark theme'),
                     value: themeProvider.isDarkMode,
                     onChanged: (value) => _saveThemeSetting(value),
-                    activeColor: AppColors.primary,
+                    activeThumbColor: AppColors.primary,
+                    activeTrackColor: AppColors.primary.withValues(alpha: 0.5),
                   );
                 },
               ),
@@ -209,23 +211,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Select Language'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: languages
-              .map(
-                (lang) => RadioListTile<String>(
-                  title: Text(lang),
-                  value: lang,
-                  groupValue: _selectedLanguage,
-                  onChanged: (value) {
-                    if (value != null) {
-                      Navigator.pop(context);
-                      _saveLanguageSetting(value);
-                    }
-                  },
-                ),
-              )
-              .toList(),
+        content: RadioGroup<String>(
+          groupValue: _selectedLanguage,
+          onChanged: (value) {
+            if (value != null) {
+              Navigator.pop(context);
+              _saveLanguageSetting(value);
+            }
+          },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: languages
+                .map(
+                  (lang) => RadioListTile<String>(
+                    title: Text(lang),
+                    value: lang,
+                  ),
+                )
+                .toList(),
+          ),
         ),
       ),
     );
@@ -359,9 +363,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
       );
 
       if (confirmed == true) {
-        final scaffoldMessenger = ScaffoldMessenger.of(context);
-        
         final success = await authProvider.deleteAccount(password: password);
+        
+        if (!mounted) return;
+        
+        final scaffoldMessenger = ScaffoldMessenger.of(context);
         
         if (success) {
           scaffoldMessenger.showSnackBar(
@@ -370,7 +376,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               backgroundColor: AppColors.success,
             ),
           );
-          if (context.mounted) {
+          if (mounted) {
             Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
           }
         } else {
@@ -383,14 +389,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
         }
       }
     } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
+      if (!mounted) return;
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: $e'),
+          backgroundColor: AppColors.error,
+        ),
+      );
     }
   }
 }

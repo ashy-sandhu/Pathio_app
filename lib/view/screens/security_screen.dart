@@ -120,7 +120,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            'Sign-in method: ${user?.provider?.toUpperCase() ?? "Unknown"}',
+                            'Sign-in method: ${user?.provider.toUpperCase() ?? "Unknown"}',
                             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                                   color: AppColors.textSecondary,
                                 ),
@@ -285,7 +285,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
                       const SizedBox(width: 16),
                       Expanded(
                         child: Text(
-                          'Password change is only available for email/password accounts. You signed in with ${user?.provider?.toUpperCase() ?? "unknown"} provider.',
+                          'Password change is only available for email/password accounts. You signed in with ${user?.provider.toUpperCase() ?? "unknown"} provider.',
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                 color: AppColors.textSecondary,
                               ),

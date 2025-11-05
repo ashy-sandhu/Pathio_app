@@ -374,7 +374,7 @@ class _PlaceSelectorDialogState extends State<_PlaceSelectorDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      child: Container(
+      child: SizedBox(
         width: double.maxFinite,
         height: MediaQuery.of(context).size.height * 0.8,
         child: Column(

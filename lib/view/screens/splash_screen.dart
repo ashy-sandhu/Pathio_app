@@ -143,7 +143,7 @@ class _SplashScreenState extends State<SplashScreen> {
                           ),
                         );
                       }
-                      return child ?? const SizedBox();
+                      return child;
                     },
                   );
                 },

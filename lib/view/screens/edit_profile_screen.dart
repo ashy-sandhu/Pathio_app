@@ -149,7 +149,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       }
 
       // Update profile
-      final updatedUser = await authProvider.updateProfile(
+      await authProvider.updateProfile(
         displayName: _nameController.text.trim(),
         photoUrl: photoUrl,
       );
