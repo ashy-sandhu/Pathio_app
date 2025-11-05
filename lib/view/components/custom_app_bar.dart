@@ -20,20 +20,18 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: Align(
-        alignment: Alignment.centerLeft,
-        child: SizedBox(
-          width: 180,
-          height: 80,
-          child: SvgPicture.asset(
-            'assets/logo/appbaricon.svg',
-            fit: BoxFit.contain,
-            alignment: Alignment.centerLeft,
-          ),
+      title: SizedBox(
+        width: 180,
+        height: 80,
+        child: SvgPicture.asset(
+          'assets/logo/appbaricon.svg',
+          fit: BoxFit.contain,
+          alignment: Alignment.centerLeft,
         ),
       ),
       backgroundColor: AppColors.surface,
       centerTitle: false,
+      titleSpacing: 0,
       foregroundColor: AppColors.textPrimary,
       elevation: 0,
       shadowColor: AppColors.shadow,
