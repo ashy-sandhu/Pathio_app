@@ -30,10 +30,12 @@ class _SplashScreenState extends State<SplashScreen> {
     return Scaffold(
       backgroundColor: AppColors.surface,
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
+        child: SizedBox(
+          width: double.infinity,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
             // Lottie Animation with FutureBuilder to handle errors properly
             SizedBox(
               width: 300,
@@ -151,14 +153,17 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
             const SizedBox(height: 40),
             // Splash Screen Logo (SVG) - Centered
-            Center(
-              child: SizedBox(
-                width: 240,
-                height: 75,
-                child: SvgPicture.asset(
-                  'assets/logo/splashscreenicon.svg',
-                  fit: BoxFit.contain,
-                  alignment: Alignment.center,
+            SizedBox(
+              width: double.infinity,
+              child: Center(
+                child: SizedBox(
+                  width: 240,
+                  height: 75,
+                  child: SvgPicture.asset(
+                    'assets/logo/splashscreenicon.svg',
+                    fit: BoxFit.contain,
+                    alignment: Alignment.center,
+                  ),
                 ),
               ),
             ),
@@ -171,6 +176,7 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
           ],
         ),
+      ),
       ),
     );
   }
