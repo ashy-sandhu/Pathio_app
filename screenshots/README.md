@@ -38,5 +38,4 @@ flutter screenshot --type=android
 - Then crop and save to this directory
 
 
-Thanks
 
