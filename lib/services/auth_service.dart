@@ -340,10 +340,57 @@ class AuthService {
   // Upload photo to Firebase Storage
   Future<String> uploadPhoto(File imageFile, String userId) async {
     try {
-      final ref = _storage.ref().child('users/$userId/profile_${DateTime.now().millisecondsSinceEpoch}.jpg');
-      await ref.putFile(imageFile);
-      final downloadUrl = await ref.getDownloadURL();
+      // Verify file exists and is readable
+      if (!await imageFile.exists()) {
+        throw Exception('Image file does not exist');
+      }
+
+      final user = _auth.currentUser;
+      if (user == null) {
+        throw Exception('User must be authenticated to upload photos');
+      }
+
+      // Create storage reference with unique filename
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final ref = _storage.ref().child('users/$userId/profile_$timestamp.jpg');
+
+      // Upload file with metadata
+      final metadata = SettableMetadata(
+        contentType: 'image/jpeg',
+        customMetadata: {
+          'uploadedBy': userId,
+          'uploadedAt': DateTime.now().toIso8601String(),
+        },
+      );
+
+      final uploadTask = ref.putFile(imageFile, metadata);
+      
+      // Wait for upload to complete
+      final snapshot = await uploadTask;
+      
+      // Get download URL
+      final downloadUrl = await snapshot.ref.getDownloadURL();
       return downloadUrl;
+    } on FirebaseException catch (e) {
+      // Handle specific Firebase Storage errors
+      String errorMessage = 'Failed to upload photo: ';
+      switch (e.code) {
+        case 'object-not-found':
+          errorMessage += 'Storage bucket not found. Please check Firebase Storage configuration.';
+          break;
+        case 'unauthorized':
+          errorMessage += 'Permission denied. Please check Firebase Storage security rules.';
+          break;
+        case 'canceled':
+          errorMessage += 'Upload was canceled.';
+          break;
+        case 'unknown':
+          errorMessage += 'Unknown error occurred: ${e.message ?? e.code}';
+          break;
+        default:
+          errorMessage += '${e.message ?? e.code}';
+      }
+      throw Exception(errorMessage);
     } catch (e) {
       throw Exception('Failed to upload photo: $e');
     }

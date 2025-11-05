@@ -1,11 +1,8 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/theme/app_colors.dart';
 import '../../state/providers/auth_provider.dart';
-import '../../services/auth_service.dart';
 import '../components/custom_app_bar.dart';
 
 class EditProfileScreen extends StatefulWidget {
@@ -18,11 +15,8 @@ class EditProfileScreen extends StatefulWidget {
 class _EditProfileScreenState extends State<EditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  final _imagePicker = ImagePicker();
-  File? _selectedImage;
   String? _selectedPhotoUrl;
   bool _isLoading = false;
-  bool _isUploadingPhoto = false;
 
   @override
   void initState() {
@@ -42,55 +36,30 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Future<void> _pickImage() async {
-    try {
-      final XFile? image = await _imagePicker.pickImage(
-        source: ImageSource.gallery,
-        maxWidth: 800,
-        maxHeight: 800,
-        imageQuality: 85,
-      );
-
-      if (image != null) {
-        setState(() {
-          _selectedImage = File(image.path);
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to pick image: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
-    }
+    _showFeatureRequiresPlanDialog();
   }
 
   Future<void> _takePhoto() async {
-    try {
-      final XFile? image = await _imagePicker.pickImage(
-        source: ImageSource.camera,
-        maxWidth: 800,
-        maxHeight: 800,
-        imageQuality: 85,
-      );
+    _showFeatureRequiresPlanDialog();
+  }
 
-      if (image != null) {
-        setState(() {
-          _selectedImage = File(image.path);
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to take photo: $e'),
-            backgroundColor: AppColors.error,
+  void _showFeatureRequiresPlanDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Feature Unavailable'),
+        content: const Text(
+          'Photo upload requires a Firebase Storage plan. This feature is currently unavailable.\n\n'
+          'Please contact support for more information about upgrading your Firebase plan.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
           ),
-        );
-      }
-    }
+        ],
+      ),
+    );
   }
 
   Future<void> _showImageSourceDialog() async {
@@ -140,13 +109,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
       String? photoUrl = _selectedPhotoUrl;
 
+      // Photo upload feature disabled - requires Firebase plan
       // Upload new photo if selected
-      if (_selectedImage != null) {
-        setState(() => _isUploadingPhoto = true);
-        final authService = AuthService();
-        photoUrl = await authService.uploadPhoto(_selectedImage!, userId);
-        setState(() => _isUploadingPhoto = false);
-      }
+      // if (_selectedImage != null) {
+      //   setState(() => _isUploadingPhoto = true);
+      //   final authService = AuthService();
+      //   photoUrl = await authService.uploadPhoto(_selectedImage!, userId);
+      //   setState(() => _isUploadingPhoto = false);
+      // }
 
       // Update profile
       await authProvider.updateProfile(
@@ -166,7 +136,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     } catch (e) {
       setState(() {
         _isLoading = false;
-        _isUploadingPhoto = false;
       });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -206,12 +175,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         color: AppColors.primary.withValues(alpha: 0.1),
                       ),
                       child: ClipOval(
-                        child: _selectedImage != null
-                            ? Image.file(
-                                _selectedImage!,
-                                fit: BoxFit.cover,
-                              )
-                            : _selectedPhotoUrl != null
+                        child: _selectedPhotoUrl != null
                                 ? CachedNetworkImage(
                                     imageUrl: _selectedPhotoUrl!,
                                     fit: BoxFit.cover,
@@ -242,31 +206,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         ),
                         child: IconButton(
                           icon: const Icon(Icons.camera_alt, color: Colors.white, size: 20),
-                          onPressed: _isUploadingPhoto ? null : _showImageSourceDialog,
+                          onPressed: _showImageSourceDialog,
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
-              if (_isUploadingPhoto)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Center(
-                    child: Column(
-                      children: [
-                        const CircularProgressIndicator(),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Uploading photo...',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
               const SizedBox(height: 32),
               // Name Field
               TextFormField(
@@ -309,7 +255,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               const SizedBox(height: 32),
               // Save Button
               ElevatedButton(
-                onPressed: _isLoading || _isUploadingPhoto ? null : _saveProfile,
+                onPressed: _isLoading ? null : _saveProfile,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
