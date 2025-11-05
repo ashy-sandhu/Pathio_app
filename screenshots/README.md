@@ -37,3 +37,6 @@ flutter screenshot --type=android
 - Android: Power + Volume Down
 - Then crop and save to this directory
 
+
+Thanks
+
