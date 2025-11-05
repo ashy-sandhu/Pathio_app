@@ -20,53 +20,63 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: SizedBox(
-        width: 180,
-        height: 80,
-        child: SvgPicture.asset(
-          'assets/logo/appbaricon.svg',
-          fit: BoxFit.contain,
-          alignment: Alignment.centerLeft,
-        ),
-      ),
       backgroundColor: AppColors.surface,
       centerTitle: false,
       titleSpacing: 0,
+      automaticallyImplyLeading: false,
+      leadingWidth: 56,
       foregroundColor: AppColors.textPrimary,
       elevation: 0,
       shadowColor: AppColors.shadow,
       surfaceTintColor: Colors.transparent,
-      leading: IconButton(
-        onPressed: onMenuTap ?? () {
-          // Open drawer if scaffoldKey is provided, otherwise show menu dialog
-          if (scaffoldKey?.currentState != null) {
-            scaffoldKey!.currentState!.openDrawer();
-          } else {
-            _showMenuDialog(context);
-          }
-        },
-        icon: const Icon(
-          Icons.menu_rounded,
-          color: AppColors.iconPrimary,
-          size: 24,
-        ),
-        tooltip: 'Menu',
-      ),
-      actions: [
-        IconButton(
-          onPressed: () {
-            // Notification functionality will be implemented in future update
-          },
-          icon: const Icon(
-            Icons.notifications_outlined,
-            color: AppColors.iconPrimary,
-            size: 24,
+      flexibleSpace: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Row(
+            children: [
+              IconButton(
+                onPressed: onMenuTap ?? () {
+                  if (scaffoldKey?.currentState != null) {
+                    scaffoldKey!.currentState!.openDrawer();
+                  } else {
+                    _showMenuDialog(context);
+                  }
+                },
+                icon: const Icon(
+                  Icons.menu_rounded,
+                  color: AppColors.iconPrimary,
+                  size: 24,
+                ),
+                tooltip: 'Menu',
+              ),
+              const SizedBox(width: 8),
+              SizedBox(
+                width: 180,
+                height: 80,
+                child: SvgPicture.asset(
+                  'assets/logo/appbaricon.svg',
+                  fit: BoxFit.contain,
+                  alignment: Alignment.centerLeft,
+                ),
+              ),
+              const Spacer(),
+              IconButton(
+                onPressed: () {
+                  // Notification functionality will be implemented in future update
+                },
+                icon: const Icon(
+                  Icons.notifications_outlined,
+                  color: AppColors.iconPrimary,
+                  size: 24,
+                ),
+                tooltip: 'Notifications',
+              ),
+              if (actions != null) ...actions!,
+              const SizedBox(width: 8),
+            ],
           ),
-          tooltip: 'Notifications',
         ),
-        if (actions != null) ...actions!,
-        const SizedBox(width: 8),
-      ],
+      ),
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
         child: Container(
