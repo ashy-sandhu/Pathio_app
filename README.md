@@ -23,29 +23,29 @@
   <table>
     <tr>
       <td align="center">
-        <img src="screenshots/splash_screen.png" alt="Splash Screen" width="200"/>
+        <img src="screenshots/splash_screen.png" alt="Splash Screen" width="1080"/>
         <br/>
         <b>Splash Screen</b>
       </td>
       <td align="center">
-        <img src="screenshots/home_screen.png" alt="Home Screen" width="200"/>
+        <img src="screenshots/home_screen.png" alt="Home Screen" width="1080"/>
         <br/>
         <b>Home Screen</b>
       </td>
       <td align="center">
-        <img src="screenshots/search_screen.png" alt="Search Screen" width="200"/>
+        <img src="screenshots/search_screen.png" alt="Search Screen" width="1080"/>
         <br/>
         <b>Search & Discover</b>
       </td>
     </tr>
     <tr>
       <td align="center">
-        <img src="screenshots/trips_screen.png" alt="Trips Screen" width="200"/>
+        <img src="screenshots/trips_screen.png" alt="Trips Screen" width="1080"/>
         <br/>
         <b>My Trips</b>
       </td>
       <td align="center">
-        <img src="screenshots/place_details.png" alt="Place Details" width="200"/>
+        <img src="screenshots/place_details.png" alt="Place Details" width="1080"/>
         <br/>
         <b>Place Details</b>
       </td>
@@ -58,7 +58,6 @@
   </table>
 </div>
 
-> **Note:** Add your actual screenshots to the `screenshots/` folder and update the paths above.
 
 ---
 
