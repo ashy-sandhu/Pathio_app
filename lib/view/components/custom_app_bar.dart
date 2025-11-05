@@ -24,8 +24,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           SizedBox(
-            width: 120,
-            height: 37.5,
+            width: 180,
+            height: 80,
             child: SvgPicture.asset(
               'assets/logo/appbaricon.svg',
               fit: BoxFit.contain,
